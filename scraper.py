@@ -2,41 +2,32 @@ import requests
 from bs4 import BeautifulSoup
 import os
 
-# The URL of the page you want to scrape
-url = 'https://www.example.com/cifar-images'
+# Function to download an image from a URL
+def download_image(image_url, folder_name, image_number):
+    print(f"Downloading image from {image_url}")
+    response = requests.get(image_url, timeout=10)  # Adding timeout argument with a value of 10 seconds
+    if response.status_code == 200:
+        with open(os.path.join(folder_name, f"image_{image_number}.jpg"), "wb") as file:
+            file.write(response.content)
+            print(f"Image {image_number} downloaded successfully.")
+    else:
+        print(f"Failed to download image {image_number}. Status code: {response.status_code}")
 
-# Make a request to the webpage
-response = requests.get(url)
-soup = BeautifulSoup(response.text, 'html.parser')
 
-# Find all the <img> tags on the page
-img_tags = soup.find_all('img')
+# Main function to scrape and download images
+def scrape_and_download_images(base_url, total_images):
+    folder_name = "data"
+    os.makedirs(folder_name, exist_ok=True)
 
-# Set a limit to the number of images to download
-limit = 100
-downloaded = 0
+    for i in range(total_images):
+        # Generate a random image URL
+        image_url = f"{base_url}/416/?random={i}"
+        print(f"Downloading image {i+1}")
+        download_image(image_url, folder_name, i + 1)
 
-# Directory where you want to save the images
-save_dir = 'cifar_images'
-if not os.path.exists(save_dir):
-    os.makedirs(save_dir)
 
-# Download the images
-for img in img_tags:
-    # Get the image source URL
-    img_url = img.get('src')
-    # Complete the image URL if it is incomplete
-    if not img_url.startswith('http'):
-        img_url = urljoin(url, img_url)
-    # Get the content of the image
-    img_data = requests.get(img_url).content
-    # Get the basename of the image file
-    filename = os.path.join(save_dir, os.path.basename(img_url))
-    # Save the image file
-    with open(filename, 'wb') as f:
-        f.write(img_data)
-    downloaded += 1
-    if downloaded >= limit:
-        break
-
-print(f'Downloaded {downloaded} images to {save_dir}')
+if __name__ == "__main__":
+    base_url = "https://picsum.photos"
+    total_images = 100
+    scrape_and_download_images(base_url, total_images)
+    print("Download completed.")
