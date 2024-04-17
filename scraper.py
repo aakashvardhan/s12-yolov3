@@ -1,44 +1,27 @@
 import requests
-from bs4 import BeautifulSoup
 import os
 
+# Replace 'YOUR_API_KEY' with your actual Pixabay API key
+API_KEY = '43436962-2f637a7010cb24edd3bd62fc2'
+SEARCH_TERM = 'animals photography'
+TOTAL_IMAGES = 100
+URL = f'https://pixabay.com/api/?key={API_KEY}&q={SEARCH_TERM}&image_type=photo&per_page={TOTAL_IMAGES}'
 
-# Function to download an image from a URL
-def download_image(image_url, folder_name, index):
-    response = requests.get(image_url)
-    print(response.status_code)
-    if response.status_code == 200:
-        with open(os.path.join(folder_name, f"image_{index}.jpg"), "wb") as file:
-            file.write(response.content)
+response = requests.get(URL)
+data = response.json()
 
+# Create a directory to save the images
+if not os.path.exists('data'):
+    os.makedirs('data')
 
-# Function to scrape images
-def scrape_images(url, total_images):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    images = soup.find_all("img")
-    print(f"Total images found: {len(images)}")
+for i, hit in enumerate(data['hits'], start=1):
+    image_url = hit['largeImageURL']
+    image_response = requests.get(image_url)
+    
+    # Save the image
+    with open(f'data/image_{i}.jpg', 'wb') as file:
+        file.write(image_response.content)
+    
+    print(f'Downloaded image {i} of {TOTAL_IMAGES}')
 
-    folder_name = "data"
-    if not os.path.isdir(folder_name):
-        os.makedirs(folder_name)
-
-    image_count = 0
-    for index, image in enumerate(images):
-        # Assuming the image source URL is contained in the 'src' attribute
-        image_url = image.get("img")
-        if any(extension in image_url for extension in [".jpg", ".jpeg", ".png"]):
-            download_image(image_url, folder_name, index)
-            image_count += 1
-            if image_count >= total_images:
-                break
-
-
-if __name__ == "__main__":
-    # URL of the page where the images are located
-    url = "https://www.istockphoto.com/photos/national-geographic-animals"
-
-    # Number of images you want to scrape
-    total_images = 100
-
-    scrape_images(url, total_images)
+print('Download completed.')
