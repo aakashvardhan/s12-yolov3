@@ -2,32 +2,43 @@ import requests
 from bs4 import BeautifulSoup
 import os
 
+
 # Function to download an image from a URL
-def download_image(image_url, folder_name, image_number):
-    print(f"Downloading image from {image_url}")
-    response = requests.get(image_url, timeout=10)  # Adding timeout argument with a value of 10 seconds
+def download_image(image_url, folder_name, index):
+    response = requests.get(image_url)
+    print(response.status_code)
     if response.status_code == 200:
-        with open(os.path.join(folder_name, f"image_{image_number}.jpg"), "wb") as file:
+        with open(os.path.join(folder_name, f"image_{index}.jpg"), "wb") as file:
             file.write(response.content)
-            print(f"Image {image_number} downloaded successfully.")
-    else:
-        print(f"Failed to download image {image_number}. Status code: {response.status_code}")
 
 
-# Main function to scrape and download images
-def scrape_and_download_images(base_url, total_images):
+# Function to scrape images
+def scrape_images(url, total_images):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    images = soup.find_all("img")
+    print(f"Total images found: {len(images)}")
+
     folder_name = "data"
-    os.makedirs(folder_name, exist_ok=True)
+    if not os.path.isdir(folder_name):
+        os.makedirs(folder_name)
 
-    for i in range(total_images):
-        # Generate a random image URL
-        image_url = f"{base_url}/416/?random={i}"
-        print(f"Downloading image {i+1}")
-        download_image(image_url, folder_name, i + 1)
+    image_count = 0
+    for index, image in enumerate(images):
+        # Assuming the image source URL is contained in the 'src' attribute
+        image_url = image.get("img")
+        if any(extension in image_url for extension in [".jpg", ".jpeg", ".png"]):
+            download_image(image_url, folder_name, index)
+            image_count += 1
+            if image_count >= total_images:
+                break
 
 
 if __name__ == "__main__":
-    base_url = "https://picsum.photos"
+    # URL of the page where the images are located
+    url = "https://www.istockphoto.com/photos/national-geographic-animals"
+
+    # Number of images you want to scrape
     total_images = 100
-    scrape_and_download_images(base_url, total_images)
-    print("Download completed.")
+
+    scrape_images(url, total_images)
