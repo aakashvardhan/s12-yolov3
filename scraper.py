@@ -1,7 +1,7 @@
 import requests
 import os
 
-# Replace 'YOUR_API_KEY' with your actual Pixabay API key
+
 API_KEY = '43436962-2f637a7010cb24edd3bd62fc2'
 SEARCH_TERM = 'animals photography'
 TOTAL_IMAGES = 100
