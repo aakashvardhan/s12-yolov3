@@ -1,4 +1,0 @@
-classes=55
-train=data/animal.txt
-test=data/animal.txt
-names=data/animal.names
