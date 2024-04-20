@@ -7,3 +7,9 @@ YoloV3/
 Yolo-Annotation-Tool-New-/
 
 *.pt
+
+weights/
+
+events*
+
+*.png
