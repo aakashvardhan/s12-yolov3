@@ -3,7 +3,7 @@ import os
 
 
 API_KEY = '43436962-2f637a7010cb24edd3bd62fc2'
-SEARCH_TERM = 'animals photography'
+SEARCH_TERM = 'tiger photography'
 TOTAL_IMAGES = 100
 URL = f'https://pixabay.com/api/?key={API_KEY}&q={SEARCH_TERM}&image_type=photo&per_page={TOTAL_IMAGES}'
 
